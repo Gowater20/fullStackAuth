@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const bcrypt = require('bcrypt');
 
 mongoose.connect("mongodb://localhost:27017/fullStack");
 
@@ -39,24 +40,34 @@ app.get("/register", (req, res) => {
 	res.sendFile(path.join(intialPath, "register.html"));
 });
 
-app.post("/register-user", (req, res) => {
-	const { name, email, password } = req.body;
 
-	if (!name.length || !email.length || !password.length) {
-		res.json("fill all the fields");
-	} else {
-		const newUser = new User({ name: name, email: email, password: password });
-		newUser
-			.save()
-			.then((data) => {
-				res.json(data);
-			})
-			.catch((err) => {
-				if (err.code === 11000) {
-					res.json("email already exists");
-				}
-			});
-	}
+app.post("/register-user", async (req, res) => {
+    const { name, email, password } = req.body;
+
+    if (!name.length || !email.length || !password.length) {
+        res.json("fill all the fields");
+        return;
+    }
+
+    try {
+        // Controlla se l'email è già presente nel database
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            res.json("email already exists");
+            return;
+        }
+
+        // Cripta la password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Crea il nuovo utente con la password criptata
+        const newUser = new User({ name, email, password: hashedPassword });
+        const data = await newUser.save();
+
+        res.json(data);
+    } catch (err) {
+        res.status(500).json("internal server error");
+    }
 });
 
 app.post("/login-user", (req, res) => {
