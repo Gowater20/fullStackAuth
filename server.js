@@ -70,16 +70,29 @@ app.post("/register-user", async (req, res) => {
     }
 });
 
-app.post("/login-user", (req, res) => {
-	const { email, password } = req.body;
+app.post("/login-user", async (req, res) => {
+    const { email, password } = req.body;
 
-	User.findOne({ email: email, password: password }).then((data) => {
-		if (data) {
-			res.json(data);
-		} else {
-			res.json("email or password is incorrect");
-		}
-	});
+    try {
+        // Trova l'utente per email
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            res.json("email or password is incorrect");
+            return;
+        }
+
+        // Confronta la password fornita con quella salvata
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (isMatch) {
+            res.json(user);
+        } else {
+            res.json("email or password is incorrect");
+        }
+    } catch (err) {
+        res.status(500).json("internal server error");
+    }
 });
 
 app.listen(3000, (req, res) => {
