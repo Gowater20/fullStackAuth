@@ -12,11 +12,12 @@ Content-Type: application/json
 }
 
 ### 
-//login 
+//login
 POST http://localhost:3000/login-user
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGU0ZTM5NzJkMTdjZmI3MzUzOGNiMSIsImVtYWlsIjoiY2ljY2lvQGdtYWlsLmNvbSIsImlhdCI6MTcxNjQwOTE1NiwiZXhwIjoxNzE2NDA5MTU3fQ.VMf68npOX3Nx9DKBN79DkFzR1FJZdikAejLvJCwIJZ8
 
 {
-"email": "prova@gmail.com",
+"email": "ciccio@gmail.com",
 "password": "test123"
 }
