@@ -6,8 +6,8 @@ POST http://localhost:3000/register-user
 Content-Type: application/json
 
 {
-"name": "franco", 
-"email": "prova@gmail.com",
+"name": "saro", 
+"email": "saro@gmail.com",
 "password": "test123"
 }
 
@@ -18,6 +18,16 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGU0ZTM5NzJkMTdjZmI3MzUzOGNiMSIsImVtYWlsIjoiY2ljY2lvQGdtYWlsLmNvbSIsImlhdCI6MTcxNjQwOTE1NiwiZXhwIjoxNzE2NDA5MTU3fQ.VMf68npOX3Nx9DKBN79DkFzR1FJZdikAejLvJCwIJZ8
 
 {
-"email": "ciccio@gmail.com",
+"email": "saro@gmail.com",
+"password": "test123"
+}
+
+###
+//delete user
+DELETE http://localhost:3000/delete-user
+Content-Type: application/json
+
+{
+"email": "saro@gmail.com",
 "password": "test123"
 }

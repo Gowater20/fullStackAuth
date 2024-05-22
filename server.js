@@ -2,8 +2,8 @@ const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const secretKey = "your_secret_key";
 mongoose.connect("mongodb://localhost:27017/fullStack");
@@ -40,63 +40,95 @@ app.get("/login", (req, res) => {
 app.get("/register", (req, res) => {
 	res.sendFile(path.join(intialPath, "register.html"));
 });
-
+app.get("/delete-user", async (req, res) => {
+    res.sendFile(path.join(intialPath, "login.html"));
+});
 
 app.post("/register-user", async (req, res) => {
-    const { name, email, password } = req.body;
+	const { name, email, password } = req.body;
 
-    if (!name.length || !email.length || !password.length) {
-        res.json("fill all the fields");
-        return;
-    }
+	if (!name.length || !email.length || !password.length) {
+		res.json("fill all the fields");
+		return;
+	}
 
-    try {
-        // Controlla se l'email è già presente nel database
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            res.json("email already exists");
-            return;
-        }
+	try {
+		// Controlla se l'email è già presente nel database
+		const existingUser = await User.findOne({ email });
+		if (existingUser) {
+			res.json("email already exists");
+			return;
+		}
 
-        // Cripta la password
-        const hashedPassword = await bcrypt.hash(password, 10);
+		// Cripta la password
+		const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Crea il nuovo utente con la password criptata
-        const newUser = new User({ name, email, password: hashedPassword });
-        const data = await newUser.save();
+		// Crea il nuovo utente con la password criptata
+		const newUser = new User({ name, email, password: hashedPassword });
+		const data = await newUser.save();
 
-        res.json(data);
-    } catch (err) {
-        res.status(500).json("internal server error");
-    }
+		res.json("user created successfully");
+	} catch (err) {
+		res.status(500).json("internal server error");
+	}
 });
 app.post("/login-user", async (req, res) => {
-    const { email, password } = req.body;
+	const { email, password } = req.body;
 
+	try {
+		// Trova l'utente per email
+		const user = await User.findOne({ email });
+		if (!user) {
+			console.log("User not found for email:", email);
+			res.json("email or password is incorrect");
+			return;
+		}
+
+		// Confronta la password fornita con quella salvata
+		const isMatch = await bcrypt.compare(password, user.password);
+		if (isMatch) {
+			// Genera un token JWT
+			const token = jwt.sign({ id: user._id, email: user.email }, secretKey, {
+				expiresIn: "1d",
+			});
+			console.log("token", token);
+
+			// Restituisce il token insieme ai dati dell'utente
+			res.json({ user, token });
+		} else {
+			res.json("email or password is incorrect");
+		}
+	} catch (err) {
+		console.error("Error during login process:", err);
+		res.status(500).json("internal server error");
+	}
+});
+
+app.delete("/delete-user", async (req, res) => {
+    const { email, password } = req.body;
     try {
-        // Trova l'utente per email
+        // Cerca l'utente nel database
         const user = await User.findOne({ email });
+        console.log("user", user);
+        // Se l'utente non esiste, restituisci un messaggio di errore
         if (!user) {
-            console.log("User not found for email:", email);
-            res.json("email or password is incorrect");
+            res.json("User not found");
             return;
         }
 
-        // Confronta la password fornita con quella salvata
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (isMatch) {
-            // Genera un token JWT
-            const token = jwt.sign({ id: user._id, email: user.email }, secretKey, { expiresIn: '1d' });
-            console.log("token", token);
-
-            // Restituisce il token insieme ai dati dell'utente
-            res.json({ user, token });
-        } else {
-            res.json("email or password is incorrect");
+        // Controlla se la password è corretta
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+            res.json("Incorrect password");
+            return;
         }
+
+        // Elimina l'utente dal database
+        await User.deleteOne({ email });
+
+        res.json("User deleted successfully");
     } catch (err) {
-        console.error("Error during login process:", err);
-        res.status(500).json("internal server error");
+        res.status(500).json("Internal server error");
     }
 });
 

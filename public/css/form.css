@@ -39,7 +39,8 @@ body{
 }
 
 input,
-.submit-btn{
+.submit-btn,
+.delete-user-btn{
     opacity: 0;
     width: 80%;
     height: 35px;
@@ -54,6 +55,14 @@ input,
     text-transform: capitalize;
 }
 
+.delete-user-btn{
+    width: auto;
+    padding: 0 20px;
+    cursor: pointer;
+    margin: 50px auto 0;
+    opacity: 0;
+}
+
 input::placeholder{
     color: #fff;
 }
@@ -64,6 +73,11 @@ input:focus,
     color: #000;
 }
 
+input:focus,
+.delete-user-btn:hover{
+    background: #d1df0e;
+    color: #bb0606;
+}
 input:focus::placeholder{
     color: #000;
 }

@@ -1,5 +1,4 @@
 // form loading animation
-
 const form = [...document.querySelector('.form').children];
 
 form.forEach((item, i) => {
@@ -9,34 +8,37 @@ form.forEach((item, i) => {
 })
 
 window.onload = () => {
+    // Check if user is logged in
     if (sessionStorage.name) {
         location.href = '/';
     }
 }
 
 // form validation
-
-const name = document.querySelector('.name') || null;
 const email = document.querySelector('.email');
 const password = document.querySelector('.password');
-const submitBtn = document.querySelector('.submit-btn');
+const submitBtn = document.querySelector('.submit-btn');       
+const deleteUserBtn = document.querySelector('.delete-user-btn');
 
-if (name == null) { // means login page is open
-    submitBtn.addEventListener('click', () => {
-        fetch('/login-user', {
-            method: 'post',
-            headers: new Headers({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({
-                email: email.value,
-                password: password.value
-            })
+// Login
+submitBtn.addEventListener('click', () => {
+    fetch('/login-user', {
+        method: 'post',
+        headers: new Headers({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+            email: email.value,
+            password: password.value
         })
-            .then(res => res.json())
-            .then(data => {
-                validateData(data);
-            })
     })
-} else { // means register page is open
+    .then(res => res.json())
+    .then(data => {
+        validateData(data);
+    })
+})
+
+// Register
+if (document.querySelector('.name')) {
+    const name = document.querySelector('.name');
 
     submitBtn.addEventListener('click', () => {
         fetch('/register-user', {
@@ -48,19 +50,44 @@ if (name == null) { // means login page is open
                 password: password.value
             })
         })
-            .then(res => res.json())
-            .then(data => {
-                validateData(data);
-            })
+        .then(res => res.json())
+        .then(data => {
+            validateData(data);
+        })
     })
+} else {
+    // Show delete user option
+    const deleteUserBtn = document.querySelector('.delete-user-btn');
+    deleteUserBtn.style.display = 'block';
 
+    // Delete User
+    deleteUserBtn.addEventListener('click', () => {
+        fetch('/delete-user', {
+            method: 'DELETE',
+            headers: new Headers({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({
+                email: email.value,
+                password: password.value
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            // Redirect to login page after successful deletion
+            if (data.success) {
+                sessionStorage.clear(); // Clear session storage
+                location.href = '/login';
+            } else {
+                alertBox(data);
+            }
+        })
+    })
 }
 
 const validateData = (data) => {
     if (data.token) {
         sessionStorage.name = data.user.name;
         sessionStorage.email = data.user.email;
-        sessionStorage.token = data.token; // Salva il token nel sessionStorage
+        sessionStorage.token = data.token;
         location.href = '/';
     } else {
         alertBox(data);
