@@ -73,10 +73,8 @@ input:focus,
     color: #000;
 }
 
-input:focus,
 .delete-user-btn:hover{
-    background: #d1df0e;
-    color: #bb0606;
+    background: #bb0606;
 }
 input:focus::placeholder{
     color: #000;
